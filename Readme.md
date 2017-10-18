@@ -1,4 +1,4 @@
-# Octokit.Lambbda.Demo
+# Octokit.Lambda.Demo
 
 This is a demonstration of a .NET Core lambda function that uses [Octokit.net]() to respond to a GitHub WebHook
 
