@@ -94,38 +94,6 @@ namespace Octokit.Lambda.Demo
                 await github.Issue.Assignee.AddAssignees(owner, repo, issueNumber, new AssigneesUpdate(new[] { "ryangribble" }));
                 message = $"Issue {owner}/{repo}#{issueNumber} is now under review";
             }
-            else if (eventType == "issue_comment" && action == "created")
-            {
-                // Extract repo/issue details from request body
-                string owner = data?.repository?.owner?.login;
-                string repo = data?.repository?.name;
-                int issueNumber = data?.issue?.number ?? 0;
-                string comment = data?.comment?.body;
-                
-                if (comment == "GTFO")
-                {
-                    var update = new IssueUpdate
-                    {
-                        State = ItemState.Closed
-                    };
-                    update.ClearLabels();
-                    update.ClearAssignees();
-
-                    await github.Issue.Update(owner, repo, issueNumber, update);
-
-                    var commentResponse = await github.Issue.Comment.Create(owner, repo, issueNumber, CannedResponses.ISSUE_CLOSED);
-                }
-                else if (comment == "LGTM")
-                {
-                    var update = new IssueUpdate();
-                    update.ClearLabels();
-                    update.AddLabel("ready");
-
-                    await github.Issue.Update(owner, repo, issueNumber, update);
-
-                    var commentResponse = await github.Issue.Comment.Create(owner, repo, issueNumber, CannedResponses.ISSUE_LGTM);
-                }
-            }
             else
             {
                 message = $"No processing required for event '{eventType}' action '{action}'";
