@@ -92,6 +92,7 @@ namespace Octokit.Lambda.Demo
                 var comment = "## :rotating_light: Review Pending :rotating_light:\nThankyou for your issue, someone will be taking a :eyes: shortly!";
                 var commentResponse = await github.Issue.Comment.Create(owner, repo, issueNumber, comment);
 
+                await github.Issue.Assignee.AddAssignees(owner, repo, issueNumber, new AssigneesUpdate(new[] { "ryangribble" }));
                 message = $"Issue {owner}/{repo}#{issueNumber} is now under review";
             }
             else
