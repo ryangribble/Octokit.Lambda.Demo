@@ -94,7 +94,6 @@ namespace Octokit.Lambda.Demo
                 await github.Issue.Assignee.AddAssignees(owner, repo, issueNumber, new AssigneesUpdate(new[] { "ryangribble" }));
                 message = $"Issue {owner}/{repo}#{issueNumber} is now under review";
             }
-#region "Issue comment"
             else if (eventType == "issue_comment" && action == "created")
             {
                 // Extract repo/issue details from request body
@@ -127,7 +126,6 @@ namespace Octokit.Lambda.Demo
                     var commentResponse = await github.Issue.Comment.Create(owner, repo, issueNumber, CannedResponses.ISSUE_LGTM);
                 }
             }
-#endregion
             else
             {
                 message = $"No processing required for event '{eventType}' action '{action}'";
