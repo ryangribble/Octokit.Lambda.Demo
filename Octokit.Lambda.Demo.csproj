@@ -14,10 +14,4 @@
     <DotNetCliToolReference Include="Amazon.Lambda.Tools" Version="1.8.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Reference Include="Octokit">
-      <HintPath>External\Octokit.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
 </Project>
