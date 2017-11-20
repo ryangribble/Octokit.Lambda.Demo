@@ -89,12 +89,45 @@ namespace Octokit.Lambda.Demo
                 var labelResponse = await github.Issue.Labels.AddToIssue(owner, repo, issueNumber, new[] { "to_be_reviewed" });
 
                 // Add a comment to the issue
-                var comment = "## :rotating_light: Review Pending :rotating_light:\nThankyou for your issue, someone will be taking a :eyes: shortly!";
-                var commentResponse = await github.Issue.Comment.Create(owner, repo, issueNumber, comment);
+                var commentResponse = await github.Issue.Comment.Create(owner, repo, issueNumber, CannedResponses.ISSUE_SEEN);
 
                 await github.Issue.Assignee.AddAssignees(owner, repo, issueNumber, new AssigneesUpdate(new[] { "ryangribble" }));
                 message = $"Issue {owner}/{repo}#{issueNumber} is now under review";
             }
+#region "Issue comment"
+            else if (eventType == "issue_comment" && action == "created")
+            {
+                // Extract repo/issue details from request body
+                string owner = data?.repository?.owner?.login;
+                string repo = data?.repository?.name;
+                int issueNumber = data?.issue?.number ?? 0;
+                string comment = data?.comment?.body;
+                
+                if (comment == "GTFO")
+                {
+                    var update = new IssueUpdate
+                    {
+                        State = ItemState.Closed
+                    };
+                    update.ClearLabels();
+                    update.ClearAssignees();
+
+                    await github.Issue.Update(owner, repo, issueNumber, update);
+
+                    var commentResponse = await github.Issue.Comment.Create(owner, repo, issueNumber, CannedResponses.ISSUE_CLOSED);
+                }
+                else if (comment == "LGTM")
+                {
+                    var update = new IssueUpdate();
+                    update.ClearLabels();
+                    update.AddLabel("ready");
+
+                    await github.Issue.Update(owner, repo, issueNumber, update);
+
+                    var commentResponse = await github.Issue.Comment.Create(owner, repo, issueNumber, CannedResponses.ISSUE_LGTM);
+                }
+            }
+#endregion
             else
             {
                 message = $"No processing required for event '{eventType}' action '{action}'";
@@ -103,4 +136,11 @@ namespace Octokit.Lambda.Demo
             return message;
         }
     }
+}
+
+public static class CannedResponses
+{
+    public static string ISSUE_SEEN = "## :rotating_light: Review Pending :rotating_light:\nThankyou for your issue, someone will be taking a :eyes: shortly!";
+    public static string ISSUE_CLOSED = "# :skull: Denied!!! :skull:\n\n![](https://media1.giphy.com/media/qiDb8McXyj6Eg/giphy.gif)";
+    public static string ISSUE_LGTM = "# :champagne: Congrats - You Rock!!! :guitar:\n\n![](https://media1.giphy.com/media/Deyr6El6Wk0z6/giphy.gif)";
 }
